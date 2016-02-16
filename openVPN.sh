@@ -1,5 +1,5 @@
 apt-get update
-apt-get install -y openvpn easy-rsa curl
+apt-get install openvpn easy-rsa curl
 
 #IPADDR=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 
@@ -12,10 +12,14 @@ sed -ie 's/;user nobody/user nobody/' /etc/openvpn/server.conf
 sed -ie 's/;group nogroup/group nogroup/' /etc/openvpn/server.conf
 echo 1 > /proc/sys/net/ipv4/ip_forward
 sed -ie 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+
 ufw allow ssh
 ufw allow 1194/udp
+ufw allow 1723/tcp
+ufw allow 47/tcp
+
 sed -ie 's/DEFAULT_FORWARD_POLICY="DROP"/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/default/ufw
-sed -i "1i# START OPENVPN RULES\n# NAT table rules\n*nat\n:POSTROUTING ACCEPT [0:0]\n# Allow traffic from OpenVPN client to eth0\n\n-A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE\nCOMMIT\n# END OPENVPN RULES\n" /etc/ufw/before.rules
+sed -i "1i# START OPENVPN RULES\n# NAT table rules\n*nat\n:POSTROUTING ACCEPT [0:0]\n# Allow traffic from OpenVPN client to eth0\n\n-A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE\nCOMMIT\n# END OPENVPN RULES\n\n\n#MOVE TO *filter!!!!\n-A ufw-before-input -p 47 -j ACCEPT\n\n\n#PPTP\n-A ufw-before-input -p tcp -s 0.0.0.0/0 --sport 1723 -j ACCEPT\n-A ufw-before-output -p tcp -d 0.0.0.0/0 --dport 1723 -j ACCEPT\n\n" /etc/ufw/before.rules
 ufw --force enable
 
 cp -r /usr/share/easy-rsa/ /etc/openvpn
@@ -30,6 +34,14 @@ cd /etc/openvpn/easy-rsa && . ./vars
 # - export KEY_ORG="<%ORG%>" # Org/company name
 # - export KEY_EMAIL="<%EMAIL%>" # Email address
 # - export KEY_OU="<%ORG_UNIT%>" # Orgizational unit / department
+
+export KEY_COUNTRY="CN"
+export KEY_PROVINCE="BJ"
+export KEY_CITY="BJ"
+export KEY_ORG="Tiertime"
+export KEY_EMAIL="simon@tiertime.net"
+export KEY_OU="UP3D"
+
 cd /etc/openvpn/easy-rsa && ./clean-all
 cd /etc/openvpn/easy-rsa && ./build-ca --batch
 cd /etc/openvpn/easy-rsa && ./build-key-server --batch server
