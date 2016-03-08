@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sudo apt-get install libxml2-dev libapr1-dev libcurl4-openssl-dev libapr1-dev libmcrypt-dev
+sudo apt-get install libxml2-dev libcurl4-openssl-dev libapr1-dev libmcrypt-dev
 
 # make tengine
 wget -c http://tengine.taobao.org/download/tengine-2.1.1.tar.gz
