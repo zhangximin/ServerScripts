@@ -2,6 +2,7 @@ apt-get update
 apt-get install openvpn easy-rsa curl
 
 #IPADDR=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+IPADDR=192.168.1.137
 
 gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz > /etc/openvpn/server.conf
 sed -ie 's/dh dh1024.pem/dh dh2048.pem/' /etc/openvpn/server.conf
@@ -52,7 +53,7 @@ service openvpn start
 
 cd /etc/openvpn/easy-rsa && ./build-key --batch client1
 cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /etc/openvpn/easy-rsa/keys/client.ovpn
-#sed -ie "s/my-server-1/$IPADDR/" /etc/openvpn/easy-rsa/keys/client.ovpn
+sed -ie "s/my-server-1/$IPADDR/" /etc/openvpn/easy-rsa/keys/client.ovpn
 sed -ie 's/;user nobody/user nobody/' /etc/openvpn/easy-rsa/keys/client.ovpn
 sed -ie 's/;group nogroup/group nogroup/' /etc/openvpn/easy-rsa/keys/client.ovpn
 sed -ie 's/ca ca.crt//' /etc/openvpn/easy-rsa/keys/client.ovpn
@@ -68,7 +69,12 @@ echo "<key>" >> /etc/openvpn/easy-rsa/keys/client.ovpn
 cat /etc/openvpn/easy-rsa/keys/client1.key >> /etc/openvpn/easy-rsa/keys/client.ovpn
 echo "</key>" >> /etc/openvpn/easy-rsa/keys/client.ovpn
 
-cp /etc/openvpn/easy-rsa/keys/client.ovpn /root/
-cp /etc/openvpn/easy-rsa/keys/client1.crt /root/
-cp /etc/openvpn/easy-rsa/keys/client1.key /root/
-cp /etc/openvpn/easy-rsa/keys/ca.crt /root/
+mkdir ~/client1
+cp /etc/openvpn/easy-rsa/keys/client.ovpn ~/client1
+cp /etc/openvpn/easy-rsa/keys/client1.crt ~/client1
+cp /etc/openvpn/easy-rsa/keys/client1.key ~/client1
+cp /etc/openvpn/easy-rsa/keys/ca.crt ~/client1
+
+im=`whoami`
+chown -R ${im}.${im} ~/client1
+
