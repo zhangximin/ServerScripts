@@ -1,7 +1,7 @@
 apt-get update
 apt-get install openvpn easy-rsa curl
 
-#IPADDR=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+#IPADDR=$(curl -s http://ip/metadata/v1/interfaces/public/0/ipv4/address)
 
 gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz > /etc/openvpn/server.conf
 sed -ie 's/dh dh1024.pem/dh dh2048.pem/' /etc/openvpn/server.conf
@@ -14,9 +14,10 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 sed -ie 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
 
 ufw allow ssh
-ufw allow 1194/udp
-ufw allow 1723/tcp
-ufw allow 47/tcp
+ufw allow 8166
+#ufw allow 1194/udp
+#ufw allow 1723/tcp
+#ufw allow 47/tcp
 
 sed -ie 's/DEFAULT_FORWARD_POLICY="DROP"/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/default/ufw
 sed -i "1i# START OPENVPN RULES\n# NAT table rules\n*nat\n:POSTROUTING ACCEPT [0:0]\n# Allow traffic from OpenVPN client to eth0\n\n-A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE\nCOMMIT\n# END OPENVPN RULES\n\n\n#MOVE TO *filter!!!!\n-A ufw-before-input -p 47 -j ACCEPT\n\n\n#PPTP\n-A ufw-before-input -p tcp -s 0.0.0.0/0 --sport 1723 -j ACCEPT\n-A ufw-before-output -p tcp -d 0.0.0.0/0 --dport 1723 -j ACCEPT\n\n" /etc/ufw/before.rules
