@@ -119,3 +119,7 @@ sudo update-rc.d -f php-fpm defaults
 else
 echo "Get php-7.0.3.tar.bz2 error!"
 fi
+
+# For Cetus3D
+sudo apt-get install php-imagick
+
