@@ -5,14 +5,14 @@
 systemctl restart httpd.service
 
 # git
-scp /etc/letsencrypt/live/tiertime.net/privkey.pem simon@192.168.1.25:~
-scp /etc/letsencrypt/live/tiertime.net/fullchain.pem simon@192.168.1.25:~
-ssh -t simon@192.168.1.25 "sudo /var/opt/gitlab/renewSSLCertificate.sh"
+scp /etc/letsencrypt/live/tiertime.net/privkey.pem simon@git.tiertime.net:~
+scp /etc/letsencrypt/live/tiertime.net/fullchain.pem simon@git.tiertime.net:~
+ssh -t simon@git.tiertime.net "sudo /var/opt/gitlab/renewSSLCertificate.sh"
 
 # svn
-scp /etc/letsencrypt/live/tiertime.net/privkey.pem simon@192.168.1.26:~
-scp /etc/letsencrypt/live/tiertime.net/fullchain.pem simon@192.168.1.26:~
-ssh -t simon@192.168.1.26 "sudo /srv/svn/renewSSLCertificate.sh"
+scp /etc/letsencrypt/live/tiertime.net/privkey.pem simon@svn.tiertime.net:~
+scp /etc/letsencrypt/live/tiertime.net/fullchain.pem simon@svn.tiertime.net:~
+ssh -t simon@svn.tiertime.net "sudo /srv/svn/renewSSLCertificate.sh"
 
 
 
