@@ -1,15 +1,27 @@
 #!/usr/bin/python3
 
+import requests
 import boto3
 import json
 from pygments import highlight, lexers, formatters
+
+def get_bad_ip_list():
+    url = "https://api.abuseipdb.com/api/v2/blacklist"
+    queryString = {
+        "confidenceMinimum": "45"
+    }
+    headers = {
+        "Key": "50902e8530129b77bdb02573dc138e5073e367d48939251d415418658e7886c2a974dba66a685ccb",
+        "Accept": "application/json"
+    }
+    res = requests.request(method="GET", url=url, headers=headers, params=queryString)
+#    print_response(res)
+    return json.loads(res.text)
 
 def jsonOut(json_msg):
     formatted_json = json.dumps(json_msg, indent=4)
     colorful_json = highlight(bytes(formatted_json, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
     print(colorful_json)
-
-waf_client = boto3.client('waf')
 
 def print_ip_sets():
     global waf_client
@@ -58,33 +70,66 @@ def delete_all_ips(ipsetid):
 def add_ip(ip, ipsetid):
     print('adding ip: {0}'.format(ip))
     global waf_client
-    rToken = waf_client.get_change_token()
-    waf_client.update_ip_set(
-        IPSetId=ipsetid,
-        ChangeToken=rToken['ChangeToken'],
-        Updates=[
-            {
-                'Action': 'INSERT',
-                'IPSetDescriptor': {
-                    'Type': 'IPV4' if len(ip) > 15 else 'IPV6',
-                    'Value': ip
-                }
-            },
-        ]
-    )
+    try:
+        rToken = waf_client.get_change_token()
+        waf_client.update_ip_set(
+            IPSetId=ipsetid,
+            ChangeToken=rToken['ChangeToken'],
+            Updates=[
+                {
+                    'Action': 'INSERT',
+                    'IPSetDescriptor': {
+                        'Type': 'IPV4' if len(ip) > 15 else 'IPV6',
+                        'Value': ip
+                    }
+                },
+            ]
+        )
+    except:
+        print('adding ip: {0} error!'.format(ip))
 
-# delete_all_ips('9ddc98b1-d742-4422-8941-8461894706d0')
-# add_ip('94.103.120.10/32', '9ddc98b1-d742-4422-8941-8461894706d0')
+# Print out request and response items.
+def print_request(req):
+    print('HTTP/1.1 {method} {url}\n{headers}\n\n{body}'.format(
+        method=req.method,
+        url=req.url,
+        headers='\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        body=req.body,
+    ))
+
+def print_response(res):
+    print('HTTP/1.1 {status_code}\n{headers}\n\n{body}'.format(
+        status_code=res.status_code,
+        headers='\n'.join('{}: {}'.format(k, v) for k, v in res.headers.items()),
+        body=res.content,
+    ))
+
+whiteList = {'119.61.27.34',
+            '119.61.27.35',
+            '124.207.116.1', '124.207.116.4', '124.207.116.10', 
+            '13.57.224.2'
+            }
+
+waf_client = boto3.client('waf')
+delete_all_ips('9ddc98b1-d742-4422-8941-8461894706d0')
 # add_ip('94.103.120.10/32', '9ddc98b1-d742-4422-8941-8461894706d0')
 # add_ip('49.235.83.106/32', '9ddc98b1-d742-4422-8941-8461894706d0')
 
 # Readline from file and sorted for distinct.
-with open('ips.log') as f:
-    lines = sorted(set(line.rstrip('\n').lower() for line in f))
+#with open('ips.bad') as f:
+#    lines = sorted(set(line.rstrip('\n').lower() for line in f))
 
-for line in lines:
-    print('Remove # at the head of next line, add {0} to firewall!'.format(line))
+#for line in lines:
+#    print('Remove # at the head of next line, add {0} to firewall!'.format(line))
 #    add_ip(line, '9ddc98b1-d742-4422-8941-8461894706d0')
+
+resp_data = get_bad_ip_list()
+if "data" in resp_data:
+    for badIp in resp_data["data"]:
+        if badIp["ipAddress"] not in whiteList:
+            add_ip(badIp["ipAddress"] + "/32", '9ddc98b1-d742-4422-8941-8461894706d0')
+else:
+    jsonOut(resp_data)
 
 print('')
 print('============')
