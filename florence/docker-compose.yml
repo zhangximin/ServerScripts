@@ -5,13 +5,13 @@ services:
         image: wordpress:5.2.4-fpm-alpine
         container_name: florence
         restart: unless-stopped
-        env_file: .env
-        environment:
-          - WORDPRESS_DB_HOST=$MYSQL_HOST
-          - WORDPRESS_DB_USER=$MYSQL_USER
-          - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
-          - WORDPRESS_DB_NAME=$MYSQL_DBNAME
-          - PHP_FPM_LISTEN=/var/run/php-fpm.sock
+#        env_file: .env
+#        environment:
+#          - WORDPRESS_DB_HOST=$MYSQL_HOST
+#          - WORDPRESS_DB_USER=$MYSQL_USER
+#          - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
+#          - WORDPRESS_DB_NAME=$MYSQL_DBNAME
+#          - PHP_FPM_LISTEN=/var/run/php-fpm.sock
         volumes:
           - ./html:/var/www/html
           - ./php-conf/www.conf:/usr/local/etc/php-fpm.d/www.conf
