@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VER=1.25.0
+VER=1.26.0
 
 if [ -f /usr/bin/docker-compose ] || [ -f /usr/local/bin/docker-compose ];then
     OVER=`docker-compose --version`
