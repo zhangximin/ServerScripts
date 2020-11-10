@@ -1,0 +1,81 @@
+sudo swapoff -a
+## vi /etc/fstab
+
+sudo snap install microk8s --classic --channel=1.19
+
+sudo usermod -a -G microk8s $USER
+
+mkdir ~/.kube
+sudo chown -f -R $USER ~/.kube
+
+su - $USER
+
+microk8s kubectl get nodes
+microk8s kubectl get services
+
+## alias kubectl='microk8s kubectl'
+
+sudo iptables -P FORWARD ACCEPT
+
+sudo ufw allow in on cbr0 && sudo ufw allow out on cbr0
+
+/var/snap/microk8s/current/args/containerd-env
+##
+HTTPS_PROXY=http://192.168.1.251:8118
+NO_PROXY=10.1.0.0/16,10.152.183.0/24,192.168.1.0/24
+
+/etc/environment
+##
+NO_PROXY=10.1.0.0/16,10.152.183.0/24,192.168.1.0/24
+
+#####################################
+microk8s enable dns
+## Change dns to 192.168.1.254
+microk8s kubectl -n kube-system edit configmap/coredns
+
+kubectl patch configmap/coredns \
+  -n kube-system \
+  --type merge \
+  -p '{"data":{"upstreamNameservers":"[\"192.168.1.254\", \"1.1.1.1\", \"1.0.0.1\"]"}}'
+#####################################
+
+microk8s status --wait-ready
+microk8s enable dashboard dns registry istio
+microk8s kubectl get all --all-namespaces
+
+kubectl config view --raw >~/.kube/config
+--------------------------------------------------------------------------------------------------------------
+####
+microk8s add-node
+####
+
+=====================================
+/var/snap/microk8s/current/args/containerd-template.toml
+
+[plugins."io.containerd.grpc.v1.cri".registry.configs."reg.tiertime.net".tls]
+  insecure_skip_verify = true
+[plugins."io.containerd.grpc.v1.cri".registry.configs."reg.tiertime.net".auth]
+  auth = "base64 string user:password"
+=====================================
+
+#####################################
+## Access dashborad
+microk8s.kubectl proxy --accept-hosts=.* --address=0.0.0.0
+
+microk8s.kubectl -n kube-system edit deploy kubernetes-dashboard -o yaml
+## add [- --enable-skip-login] to args: under containers of spec.
+
+http://192.168.1.210:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
+
+--------------------------------------------------
+If RBAC is not enabled access the dashboard using the default token retrieved with:
+
+token=$(microk8s kubectl -n kube-system get secret | grep default-token | cut -d " " -f1)
+microk8s kubectl -n kube-system describe secret $token
+
+In an RBAC enabled setup (microk8s enable RBAC) you need to create a user with restricted
+permissions as shown in:
+https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
+
+#####################################
+microk8s.kubectl run ubuntu --rm --tty -i --restart='Never' --image ubuntu:18.04 --namespace default --command -- bash
