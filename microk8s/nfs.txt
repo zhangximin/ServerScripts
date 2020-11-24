@@ -1,0 +1,61 @@
+----------------------
+Install
+
+sudo apt install nfs-kernel-server
+
+sudo mkdir -p /mnt/nfs_share
+
+sudo chown -R nobody:nogroup /mnt/nfs_share/
+
+sudo chmod 777 /mnt/nfs_share/
+
+sudo vim /etc/exports
+
+/mnt/nfs_share  192.168.1.0/24(rw,sync,no_subtree_check)
+
+
+    rw: Stands for Read/Write.
+    sync: Requires changes to be written to the disk before they are applied.
+    No_subtree_check: Eliminates subtree checking.
+
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server
+
+--------------------------
+Firewall
+
+To do so, open /etc/default/nfs-kernel-server and comment out the line
+
+RPCMOUNTDOPTS=--manage-gids
+
+and add the following line
+
+RPCMOUNTDOPTS="-p 13025"
+
+13025 is just a randomly selected port, something that is available and isn't already defined in /etc/services.
+
+Restart NFSd with sudo /etc/init.d/nfs-kernel-server restart
+
+Now configure the UFW to accept incoming connections on port 13025, 2049 and port 111.
+
+ufw allow from 192.168.1.0/24 to any port 111
+ufw allow from 192.168.1.0/24 to any port 2049
+ufw allow from 192.168.1.0/24 to any port 13025
+
+That's it. You should now be able to mount your exports form another machine. :-)
+---------------------------
+NFS-Client
+
+sudo apt install nfs-common
+
+sudo mkdir -p /mnt/nfs_clientshare
+
+sudo mount 192.168.1.200:/mnt/nfs_share  /mnt/nfs_clientshare
+
+----
+fstab
+
+192.168.1.200:/mnt/harbor /mnt/harbor nfs rw,hard,intr,rsize=8192,wsize=8192,timeo=14 0 0
+----
+
+-----------------------------

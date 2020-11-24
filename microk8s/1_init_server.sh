@@ -25,7 +25,7 @@ if [ $# -eq 2 ];then
 		echo ""
 		tPs=$REPLY
 
-		sshpass -p ${tPs} ssh ${USER}@${tIP} "ssh-keygen -P '' -N '' -f ~/.ssh/id_rsa"
+		sshpass -p ${tPs} ssh ${USER}@${tIP} "ssh-keygen -o -t rsa -b 4096 -P '' -N '' -f ~/.ssh/id_rsa"
 
 		if [ -f ~/.ssh/authorized_keys ];then
 			sshpass -p ${tPs} scp ~/.ssh/authorized_keys ${USER}@${tIP}:~/.ssh/
@@ -36,8 +36,8 @@ if [ $# -eq 2 ];then
 		echo "Done."
 
 		echo "Updating system ... ..."
-		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo apt-get update -y"
 		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo apt-get upgrade -y"
+		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo apt-get update -y"
 		echo "Done."
 
 		read -p "If reboot system NOW ? " -n 1 -r
