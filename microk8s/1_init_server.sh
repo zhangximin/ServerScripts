@@ -35,9 +35,11 @@ if [ $# -eq 2 ];then
 		sshpass -p ${tPs} ssh -tt ${USER}@${tIP} "echo ${tPs}| sudo -S -s /bin/bash -c 'echo \"${USER} ALL=(ALL:ALL) NOPASSWD:ALL\" >> /etc/sudoers'"
 		echo "Done."
 
+		echo "Changing apt sourcelist to huaweiclould"
+		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo sed -i \"s@http://.*archive.ubuntu.com@http://mirrors.huaweicloud.com@g\" /etc/apt/sources.list"
+		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo sed -i \"s@http://.*security.ubuntu.com@http://mirrors.huaweicloud.com@g\" /etc/apt/sources.list"
 		echo "Updating system ... ..."
-		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo apt-get upgrade -y"
-		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo apt-get update -y"
+		sshpass -p ${tPs} ssh ${USER}@${tIP} "sudo apt-get update -y && sudo apt-get upgrade -y"
 		echo "Done."
 
 		read -p "If reboot system NOW ? " -n 1 -r
