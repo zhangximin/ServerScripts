@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    run: redis
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: harbor-redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-redis-deployment
+  labels:
+    app: harbor-redis
+spec:
+  selector:
+    matchLabels:
+      app: harbor-redis
+  template:
+    metadata:
+      labels:
+        app: harbor-redis
+    spec:
+      containers:
+      - name: harbor-redis
+        image: reg.tiertime.net/harbor/redis:4-alpine
+        #        ports:
+        # - name: harbor-redis
+        #   containerPort: 6379
+          #      imagePullSecrets:
+          #      - name: reg-secret

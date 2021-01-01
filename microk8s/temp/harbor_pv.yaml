@@ -1,0 +1,65 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: tiertime-nfs-storageclass
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: tiertime.net/nfs
+  parameters:
+    archiveOnDelete: “false”
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: nfs-client-provisioner
+spec:
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner
+          image: quay.io/external_storage/nfs-client-provisioner:latest
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /mnt/harbor
+          env:
+            - name: PROVISIONER_NAME
+              value: tiertime.net/nfs
+            - name: NFS_SERVER
+              value: 192.168.1.200
+            - name: NFS_PATH
+              value: /mnt/harbor
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: 192.168.1.200
+            path: /mnt/harbor
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-harbor
+spec:
+  capacity:
+    storage: 50Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: tiertime-nfs-storageclass
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /mnt/harbor
+    server: 192.168.1.200
+

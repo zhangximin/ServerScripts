@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-tomcat-deployment
+  labels:
+    app: harbor-tomcat
+spec:
+  selector:
+    matchLabels:
+      app: harbor-tomcat
+  template:
+    metadata:
+      labels:
+        app: harbor-tomcat
+    spec:
+      containers:
+      - name: harbor-tomcat
+        image: reg.tiertime.net/harbor/harbor_tomcat:v1.1
+        ports:
+        - name: harbor-tomcat
+          containerPort: 8443
+          #      imagePullSecrets:
+          #      - name: reg-secret
