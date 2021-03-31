@@ -1,7 +1,7 @@
 #!/bin/sh
-tmux new-session -d
-tmux split-window -h -p 40
-tmux split-window -v
-tmux attach-session -d -t 0
-
-
+tmux new-session \; \
+ send-keys 'cd ~/currentWork; ll' C-m \; \
+ split-window -h -p 50 \; \
+ send-keys 'll' C-m \; \
+ split-window -v \; \
+ select-pane -t 0 \;
