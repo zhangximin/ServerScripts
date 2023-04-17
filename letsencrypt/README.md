@@ -7,7 +7,7 @@
 ## 打包
 
 ```shell
-docker build -t tier_letsencrypt .
+docker build --no-cache -t tier_letsencrypt .
 ```
 
 ## 取得证书
@@ -15,7 +15,7 @@ docker build -t tier_letsencrypt .
 支持获取多个域名和通用域名证书。
 
 ```shell
-docker run -it --rm -e "ali_ak=access_key" -e "ali_sk=access_secret_key" -e "email=simon@tiertime.net" -v ./ssl/:/etc/letsencrypt/ tier_letsencrypt obtain_cert -d "tiertime.net" -d "*.tiertime.net"
+docker run -it --rm -e "ali_ak=access_key" -e "ali_sk=access_secret_key" -e "email=simon@tiertime.net" -v ./ssl/:/etc/letsencrypt/ tier_letsencrypt obtain_cert -d "*.tiertime.net"
 ```
 
 *生成的证书在当前目录下的ssl目录里，目录不要移动，更新的时候还需要这个路径。*

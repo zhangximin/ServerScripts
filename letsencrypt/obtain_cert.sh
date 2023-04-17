@@ -7,6 +7,8 @@ chmod 600 /etc/letsencrypt/dns-aliyun-credentials.ini;
 
 /opt/certbot/bin/certbot certonly -a dns-aliyun \
     --dns-aliyun-credentials /etc/letsencrypt/dns-aliyun-credentials.ini \
-    --non-interactive --agree-tos -m $email \
+    --non-interactive --agree-tos \
+    --dns-aliyun-propagation-seconds 60 \
+    -m $email \
     -i nginx \
     $@

@@ -6,7 +6,7 @@ ENV EMAIL=simon@tiertime.net
 
 RUN sed -i "s@archive.ubuntu.com@repo.huaweicloud.com@g" /etc/apt/sources.list; \
     sed -i "s@security.ubuntu.com@repo.huaweicloud.com@g" /etc/apt/sources.list; \    
-    apt update;\
+    apt update && apt upgrade; \    
     apt -y install tzdata locales apt-utils; \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone;\
     locale-gen en_US.UTF-8;\
